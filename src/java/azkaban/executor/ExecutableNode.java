@@ -44,6 +44,7 @@ public class ExecutableNode {
 	public static final String PROPS_SOURCE_PARAM = "propSource";
 	public static final String JOB_SOURCE_PARAM = "jobSource";
 	public static final String OUTPUT_PROPS_PARAM = "outputProps";
+	public static final String RUN_ON_FAIL = "runOnFail";
 	
 	private String id;
 	private String type = null;
@@ -51,6 +52,7 @@ public class ExecutableNode {
 	private long startTime = -1;
 	private long endTime = -1;
 	private long updateTime = -1;
+	private boolean runOnFail = false;
 	
 	// Path to Job File
 	private String jobSource; 
@@ -76,17 +78,19 @@ public class ExecutableNode {
 		this.id = node.getId();
 		this.jobSource = node.getJobSource();
 		this.propsSource = node.getPropsSource();
+		this.runOnFail = node.getRunOnFail();
 	}
 	
 	public ExecutableNode(Node node, ExecutableFlowBase parent) {
-		this(node.getId(), node.getType(), node.getJobSource(), node.getPropsSource(), parent);
+		this(node.getId(), node.getType(), node.getJobSource(), node.getPropsSource(), node.getRunOnFail(), parent);
 	}
 
-	public ExecutableNode(String id, String type, String jobSource, String propsSource, ExecutableFlowBase parent) {
+	public ExecutableNode(String id, String type, String jobSource, String propsSource, boolean runOnFail, ExecutableFlowBase parent) {
 		this.id = id;
 		this.jobSource = jobSource;
 		this.propsSource = propsSource;
 		this.type = type;
+		this.runOnFail = runOnFail;
 		setParentFlow(parent);
 	}
 	
@@ -224,7 +228,17 @@ public class ExecutableNode {
 	public void setAttempt(int attempt) {
 		this.attempt = attempt;
 	}
-	
+
+	public boolean getRunOnFail()
+	{
+		return runOnFail;
+	}
+
+	public void setRunOnFail(boolean runOnFail)
+	{
+		this.runOnFail = runOnFail;
+	}
+
 	public void resetForRetry() {
 		ExecutionAttempt pastAttempt = new ExecutionAttempt(attempt, this);
 		attempt++;
@@ -279,6 +293,7 @@ public class ExecutableNode {
 		objMap.put(UPDATETIME_PARAM, updateTime);
 		objMap.put(TYPE_PARAM, type);
 		objMap.put(ATTEMPT_PARAM, attempt);
+		objMap.put(RUN_ON_FAIL, runOnFail ? "true" : "false");
 		
 		if (inNodes != null && !inNodes.isEmpty()) {
 			objMap.put(INNODES_PARAM, inNodes);
@@ -316,6 +331,7 @@ public class ExecutableNode {
 		this.endTime = wrappedMap.getLong(ENDTIME_PARAM);
 		this.updateTime = wrappedMap.getLong(UPDATETIME_PARAM);
 		this.attempt = wrappedMap.getInt(ATTEMPT_PARAM, 0);
+		this.runOnFail = "true".equalsIgnoreCase(wrappedMap.getString(RUN_ON_FAIL));
 
 		this.inNodes = new HashSet<String>();
 		this.inNodes.addAll(wrappedMap.getStringCollection(INNODES_PARAM, Collections.<String>emptySet()));
@@ -355,7 +371,8 @@ public class ExecutableNode {
 		updatedNodeMap.put(STARTTIME_PARAM, getStartTime());
 		updatedNodeMap.put(ENDTIME_PARAM, getEndTime());
 		updatedNodeMap.put(UPDATETIME_PARAM, getUpdateTime());
-		
+		updatedNodeMap.put(RUN_ON_FAIL, getRunOnFail() ? "true" : "false");
+
 		updatedNodeMap.put(ATTEMPT_PARAM, getAttempt());
 
 		if (getAttempt() > 0) {
@@ -374,6 +391,7 @@ public class ExecutableNode {
 		this.startTime = updateData.getLong(STARTTIME_PARAM);
 		this.updateTime = updateData.getLong(UPDATETIME_PARAM);
 		this.endTime = updateData.getLong(ENDTIME_PARAM);
+		this.runOnFail = "true".equalsIgnoreCase(updateData.getString(RUN_ON_FAIL));
 		
 		if (updateData.containsKey(ATTEMPT_PARAM)) {
 			attempt = updateData.getInt(ATTEMPT_PARAM);

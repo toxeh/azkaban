@@ -213,6 +213,10 @@ public class DirectoryFlowLoader {
 				continue;
 			}
 
+
+			boolean runNoFail = "true".equalsIgnoreCase(props.getString(CommonJobProperties.RUN_ON_FAIL, "false"));
+			node.setRunOnFail(runNoFail);
+
 			List<String> dependencyList = props.getStringList(CommonJobProperties.DEPENDENCIES, (List<String>)null);
 			
 			if (dependencyList != null) {

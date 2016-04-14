@@ -1,0 +1,4 @@
+type=command
+command=date
+dependencies=step1
+run.on.fail=true

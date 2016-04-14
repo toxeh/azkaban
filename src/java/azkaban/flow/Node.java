@@ -31,6 +31,8 @@ public class Node {
 	private int level;
 	private int expectedRunTimeSec = 1;
 	private String type;
+
+	private boolean runOnFail;
 	
 	private String embeddedFlowId;
 	
@@ -46,6 +48,7 @@ public class Node {
 		this.id = clone.id;
 		this.propsSource = clone.propsSource;
 		this.jobSource = clone.jobSource;
+		this.runOnFail = clone.runOnFail;
 	}
 
 	public String getId() {
@@ -111,6 +114,16 @@ public class Node {
 	public String getEmbeddedFlowId() {
 		return embeddedFlowId;
 	}
+
+	public boolean getRunOnFail()
+	{
+		return runOnFail;
+	}
+
+	public void setRunOnFail(boolean runOnFail)
+	{
+		this.runOnFail = runOnFail;
+	}
 	
 	@SuppressWarnings("unchecked")
 	public static Node fromObject(Object obj) {
@@ -121,6 +134,7 @@ public class Node {
 		String jobSource = (String)mapObj.get("jobSource");
 		String propSource = (String)mapObj.get("propSource");
 		String jobType = (String)mapObj.get("jobType");
+		boolean runOnFail = "true".equalsIgnoreCase((String)mapObj.get("runOnFail"));
 
 		String embeddedFlowId = (String)mapObj.get("embeddedFlowId");
 
@@ -128,6 +142,7 @@ public class Node {
 		node.setPropsSource(propSource);
 		node.setType(jobType);
 		node.setEmbeddedFlowId(embeddedFlowId);
+		node.setRunOnFail(runOnFail);
 		
 		Integer expectedRuntime = (Integer)mapObj.get("expectedRuntime");
 		if (expectedRuntime != null) {
@@ -166,6 +181,7 @@ public class Node {
 		objMap.put("jobSource", jobSource);
 		objMap.put("propSource", propsSource);
 		objMap.put("jobType", type);
+		objMap.put("runOnFail", runOnFail ? "true" : "false");
 		if (embeddedFlowId != null) {
 			objMap.put("embeddedFlowId", embeddedFlowId);
 		}

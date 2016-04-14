@@ -36,7 +36,8 @@ public class CommonJobProperties {
 	 * Comma delimited list of job names which are dependencies
 	 */
 	public static final String DEPENDENCIES = "dependencies";
-	
+
+	public static final String RUN_ON_FAIL = "run.on.fail";
 	/**
 	 * The number of retries when this job has failed.
 	 */

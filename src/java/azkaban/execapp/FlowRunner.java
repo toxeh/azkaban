@@ -425,17 +425,24 @@ public class FlowRunner extends EventHandler implements Runnable {
 		for (ExecutableNode node: finishedNodes) {
 			Set<String> outNodeIds = node.getOutNodes();
 			ExecutableFlowBase parentFlow = node.getParentFlow();
-			
+			boolean hasRunOnFailJobs = false;
+			boolean currentNodeFailed = node.getStatus() == Status.FAILED;
+			for (String outNodeId : outNodeIds) {
+				hasRunOnFailJobs |= parentFlow.getExecutableNode(outNodeId).getRunOnFail();
+			}
 			// If a job is seen as failed, then we set the parent flow to FAILED_FINISHING
-			if (node.getStatus() == Status.FAILED) {
+			if (currentNodeFailed) {
+				// check next job has runOnFail property
 				// The job cannot be retried or has run out of retry attempts. We will 
 				// fail the job and its flow now.
 				if (!retryJobIfPossible(node)) {
-					propagateStatus(node.getParentFlow(), Status.FAILED_FINISHING);
-					if (failureAction == FailureAction.CANCEL_ALL) {
-						this.kill();
+					if (!hasRunOnFailJobs) {
+						propagateStatus(node.getParentFlow(), Status.FAILED_FINISHING);
+						if (failureAction == FailureAction.CANCEL_ALL) {
+							this.kill();
+						}
+						this.flowFailed = true;
 					}
-					this.flowFailed = true;
 				}
 				else {
 					nodesToCheck.add(node);
@@ -460,7 +467,12 @@ public class FlowRunner extends EventHandler implements Runnable {
 			// see if any are candidates for running.
 			for (String nodeId: outNodeIds) {
 				ExecutableNode outNode = parentFlow.getExecutableNode(nodeId);
-				nodesToCheck.add(outNode);
+				if ((currentNodeFailed && !outNode.getRunOnFail()) ||
+					 !currentNodeFailed && outNode.getRunOnFail()) {
+					outNode.setStatus(Status.SKIPPED);
+				} else {
+					nodesToCheck.add(outNode);
+				}
 			}
 		}
 
@@ -739,7 +751,9 @@ public class FlowRunner extends EventHandler implements Runnable {
 		for (String dependency: node.getInNodes()) {
 			ExecutableNode dependencyNode = flow.getExecutableNode(dependency);
 			Status depStatus = dependencyNode.getStatus();
-			
+			if (depStatus  == Status.FAILED && node.getRunOnFail()) {
+				return Status.READY;
+			}
 			if (!Status.isStatusFinished(depStatus)) {
 				return null;
 			}
