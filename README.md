@@ -8,7 +8,8 @@ If previous step FAILED - this job will be executed.
 
 See [example](https://github.com/toxeh/azkaban/tree/2.5.0-runOnFail/runOnFailExample)
 
-[[https://raw.githubusercontent.com/toxeh/azkaban/2.5.0-runOnFail/runOnFailExample/onFail.png]] [[https://raw.githubusercontent.com/toxeh/azkaban/2.5.0-runOnFail/runOnFailExample/onSuccess.png]]
+![On fail](runOnFailExample/onFail.png?raw=true) 
+![On Success](runOnFailExample/onSuccess.png?raw=true)
 
 [![Build Status](https://travis-ci.org/azkaban/azkaban2.png?branch=master)](https://travis-ci.org/azkaban/azkaban2)
 
